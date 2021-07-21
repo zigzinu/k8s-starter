@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sanjabu-deployment
+  namespace: default
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: was
+  template:
+    metadata:
+      labels:
+        app: was
+    spec:
+      hostAliases:
+      - ip: "192.168.56.100"
+        hostnames:
+        - "orderer.example.com"
+      - ip: "192.168.56.100"
+        hostnames:
+        - "peer0.org1.example.com"
+      containers:
+      - name: sanjabu-container
+        image: jinwoogusan/sanjabu
+      imagePullSecrets:
+      - name: regcred
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sanjabu-entrypoint
+  namespace: default
+spec:
+  type: LoadBalancer
+  selector:
+    app: was
+  ports:
+  - protocol: TCP
+    port: 8089
+    targetPort: 8080
+  externalIPs:
+  - 192.168.56.200
